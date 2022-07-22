@@ -245,7 +245,7 @@ void Shooter::drawStatsTable() {
             + std::to_string((int)p->health())
             + "\t" + std::to_string(p->ping);
 
-        screen->drawText(text,Vec2D{10, 15 + 35.0 * i}, 25, sf::Color(0, 0, 0, 150));
+        screen->drawText(text,Vec2D{10, 15 + 35.0 * i}, 25, p->color());
         i++;
     }
 
