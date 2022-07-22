@@ -23,6 +23,8 @@ enum class MsgType {
 
     // this is for higher level clients & servers
     Custom,
+    Ping,
+    Pong
 };
 
 sf::Packet &operator<<(sf::Packet &packet, MsgType type);

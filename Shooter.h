@@ -16,6 +16,7 @@
 
 
 class Shooter final : public Engine {
+
 private:
     std::shared_ptr<Player> player = std::make_shared<Player>(ObjectNameTag("Player"),
                                                               ShooterConsts::CUBE_OBJ,
@@ -48,6 +49,9 @@ private:
     void addWeapon(std::shared_ptr<Weapon> weapon);
     void removeWeapon(std::shared_ptr<Weapon> weapon);
     void changeEnemyWeapon(const std::string &weaponName, sf::Uint16 enemyId);
+    void drawNicknames();
+
+    double tick = 0;
 
 public:
     Shooter() : mainMenu(screen, mouse) {};

@@ -162,6 +162,17 @@ void Shooter::update() {
         screen->stopRender();
     }
 
+    if (keyboard->isKeyTapped(sf::Keyboard::Num1)) {
+        player->addWeapon(std::make_shared<Rifle>());
+    }
+    if (keyboard->isKeyTapped(sf::Keyboard::Num2)) {
+        for (auto& [playerId, player] : client->players()) {
+            if(client->getOwnId() != playerId){
+                client->damagePlayer(playerId, DBL_MAX);
+            }
+        }
+    }
+
     if (inGame) {
         screen->setTitle(ShooterConsts::PROJECT_NAME);
         playerController->update();
@@ -170,6 +181,15 @@ void Shooter::update() {
     }
 
     setUpdateWorld(inGame);
+
+    string list = "damirlut";
+
+    list[ (int)tick % list.length()] = '*';
+
+    player->setPlayerNickName(list);
+    
+   
+    tick += 0.25;
 
     // background sounds and music control
     if (SoundController::getStatus(SoundTag("background")) != sf::Sound::Status::Playing) {
@@ -190,13 +210,33 @@ void Shooter::gui() {
     // health player stats
     drawPlayerStats();
     drawStatsTable();
+    drawNicknames();
+}
+
+void Shooter::drawNicknames() {
+
+    vector<shared_ptr < Player>>
+        allPlayers;
+    allPlayers.push_back(player);
+    for (auto& [playerId, player] : client->players())
+        allPlayers.push_back(player);
+
+    int i = 1;
+
+    for (auto& p : allPlayers) {
+
+        i++;
+    }
+
 }
 
 void Shooter::drawStatsTable() {
 
     int i = 1;
 
+
     screen->drawText(client->lastEvent(), Vec2D{10, 10}, 25, sf::Color(0, 0, 0, 100));
+    screen->drawText("Ping: "+std::to_string(client->ping), Vec2D{(double)screen->width()/2 , 25}, 25, sf::Color(0, 0, 0, 255));
 
     vector<shared_ptr < Player>>
     allPlayers;
@@ -209,9 +249,13 @@ void Shooter::drawStatsTable() {
     });
 
     for (auto &p : allPlayers) {
-        screen->drawText(std::to_string(i) + "\t" + p->playerNickName() + "\t" + std::to_string(p->kills()) + " / " +
-                         std::to_string(p->deaths()),
-                         Vec2D{10, 15 + 35.0 * i}, 25, sf::Color(0, 0, 0, 150));
+        auto text = std::to_string(i)
+            + "\t" + p->playerNickName()
+            + "\t" + std::to_string(p->kills()) + " / " + std::to_string(p->deaths()) + "\t"
+            + std::to_string((int)p->health())
+            + "\t" + std::to_string(p->ping);
+
+        screen->drawText(text,Vec2D{10, 15 + 35.0 * i}, 25, sf::Color(0, 0, 0, 150));
         i++;
     }
 
@@ -315,13 +359,15 @@ void Shooter::addFireTrace(const Vec3D &from, const Vec3D &to) {
 
     std::string bulletHoleName = "Client_bulletHole_" + std::to_string(fireTraces++);
     auto bulletHole = Mesh::Cube(ObjectNameTag(bulletHoleName), 0.2, sf::Color(70, 70, 70));
+    
     bulletHole.translate(to);
     world->addBody(std::make_shared<RigidBody>(bulletHole));
     world->body(ObjectNameTag(bulletHoleName))->setCollider(false);
-
+    
     Timeline::addAnimation<AFunction>(AnimationListTag(bulletHoleName + "_delete"),
                                       [this, bulletHoleName]() { removeFireTrace(ObjectNameTag(bulletHoleName)); }, 1,
                                       7);
+    
 }
 
 void Shooter::removeFireTrace(const ObjectNameTag &traceName) {

@@ -13,7 +13,7 @@
 void ShooterClient::updatePacket() {
     sf::Packet packet;
     packet << MsgType::ClientUpdate << _player->position().x() << _player->position().y() << _player->position().z()
-           << _player->angle().y() << _player->headAngle() << _player->playerNickName();
+           << _player->angle().y() << _player->headAngle() << _player->playerNickName() << ping;
     _socket.send(packet, _socket.serverId());
 }
 
@@ -40,8 +40,9 @@ void ShooterClient::processUpdate(sf::Packet &packet) {
     sf::Uint16 targetId;
     double x, y, z, health, bodyAngle, headAngle;
     std::string playerName;
+    int ping;
 
-    while (packet >> targetId >> x >> y >> z >> health >> bodyAngle >> headAngle >> playerName) {
+    while (packet >> targetId >> x >> y >> z >> health >> bodyAngle >> headAngle >> playerName >> ping) {
         if (_players.count(targetId)) {
             std::string name = "Enemy_" + std::to_string(targetId);
 
@@ -50,6 +51,7 @@ void ShooterClient::processUpdate(sf::Packet &packet) {
             bool isAnimate = (_players[targetId]->position() - newPosition).sqrAbs() > 0.2;
 
             _players[targetId]->translateToPoint(newPosition);
+            _players[targetId]->ping = ping;
 
             _players[targetId]->setHealth(health);
             _players[targetId]->rotateToAngle(Vec3D{0, bodyAngle, 0});
@@ -126,11 +128,23 @@ void ShooterClient::processCustomPacket(sf::Packet &packet) {
     sf::Uint16 buffId[2];
     double dbuff[10];
     std::string tmp, tmp2;
-
+    sf::Packet sendPacket;
     ShooterMsgType type;
     packet >> type;
 
     switch (type) {
+
+        case ShooterMsgType::Pong:
+
+            ping = (int)((Time::time() - lastPing) * 1000);
+            
+            sendPacket << MsgType::Custom << ShooterMsgType::Ping;
+            _socket.send(sendPacket, _socket.serverId());
+
+            lastPing = Time::time();
+
+        break;
+
         case ShooterMsgType::Kill:
             packet >> buffId[0] >> buffId[1];
             _lastEvent = "";
@@ -138,9 +152,11 @@ void ShooterClient::processCustomPacket(sf::Packet &packet) {
                 _player->addKill();
                 SoundController::loadAndPlay(SoundTag("kill"), ShooterConsts::KILL_SOUND);
                 _lastEvent += _player->playerNickName();
+                _lastEvent += " {" + _player->weapon()->name().str() + "}";
             } else {
                 _players[buffId[1]]->addKill();
                 _lastEvent += _players[buffId[1]]->playerNickName();
+                _lastEvent += " {" + _players[buffId[1]]->weapon()->name().str() + "}";
             }
             _lastEvent += " ~> ";
 

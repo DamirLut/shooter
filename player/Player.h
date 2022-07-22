@@ -44,6 +44,7 @@ private:
     void collisionWithObject(const ObjectNameTag &tag, std::shared_ptr<RigidBody> obj);
     void rotateWeapon();
 public:
+    int ping;
     explicit Player(ObjectNameTag name, const std::string &filename = ShooterConsts::CUBE_OBJ, const Vec3D &scale = Vec3D{1, 1, 1});
 
     void setHealth(double h) { _health = h; }
@@ -71,7 +72,16 @@ public:
 
     void reload();
 
-    [[nodiscard]] std::shared_ptr<Weapon> weapon() const { return _weapons[_selectedWeapon]; }
+    [[nodiscard]] std::shared_ptr<Weapon> weapon() const {
+    if (!hasWeapon()) {
+        return std::make_shared<Gun>();
+    }
+    return _weapons[_selectedWeapon];
+    }
+
+    [[nodiscard]] bool hasWeapon() const {
+        return _weapons.size() > 1;
+    }
 
     void rotateWeaponsRelativePoint(const Vec3D &point, const Vec3D &v, double val);
 

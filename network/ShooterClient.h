@@ -8,6 +8,9 @@
 #include "../engine/network/ClientUDP.h"
 #include "../player/Player.h"
 
+
+using namespace std::chrono;
+
 class ShooterClient final : public ClientUDP {
 private:
     std::string _lastEvent;
@@ -21,7 +24,11 @@ private:
     std::function<void(const std::string &, const Vec3D &)> _addBonusCallBack;
     std::function<void(const ObjectNameTag &)> _removeBonusCallBack;
     std::function<void(const std::string &, sf::Uint16)> _changeEnemyWeaponCallBack;
+
+    double lastPing;
+
 public:
+    int ping;
     explicit ShooterClient(std::shared_ptr<Player> player) : _player(player) {};
 
     void updatePacket() override;
@@ -63,6 +70,8 @@ public:
     [[nodiscard]] std::map<sf::Uint16, std::shared_ptr<Player>> const &players() const { return _players; }
 
     [[nodiscard]] std::string lastEvent() const { return _lastEvent; }
+
+    static ShooterClient *self;
 };
 
 

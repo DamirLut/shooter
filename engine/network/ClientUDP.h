@@ -26,6 +26,10 @@ public:
     // create new ClientUDP()
     explicit ClientUDP();
 
+    [[nodiscard]] sf::Uint16 getOwnId() const {
+        return _socket.ownId();
+    }
+
     [[nodiscard]] bool isWorking() const;
 
     [[nodiscard]] bool connected() const;
