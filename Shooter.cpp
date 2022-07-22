@@ -3,48 +3,38 @@
 //
 
 #include "Shooter.h"
-#include <fstream>
 #include <utility>
 #include "engine/animation/Animations.h"
 #include "ShooterConsts.h"
 #include "engine/io/SoundController.h"
+#include "engine/io/Config.h"
+#include "engine/utils/String.h"
 
 using namespace std;
 
 // Read server/client settings and start both.
 // If client doesn't connect to the localhost - server doesn't start.
 void Shooter::initNetwork() {
-    std::string clientIp;
-    sf::Uint16 clientPort;
-    sf::Uint16 serverPort;
-    std::string playerName;
-    std::ifstream connectFile("connect.txt", std::ifstream::in);
+    std::string clientIp = "127.0.0.1";
+    sf::Uint16 clientPort = 54000;
+    sf::Uint16 serverPort = 54000;
+    std::string playerName = "PlayerName";
 
     // If failed to read client settings
-    if (!connectFile.is_open() || !(connectFile >> clientIp >> clientPort >> playerName) ||
-        sf::IpAddress(clientIp) == sf::IpAddress::None) {
-        connectFile.close();
-        // Create file and write default settings
-        clientIp = "127.0.0.1";
-        clientPort = 54000;
-        playerName = "PlayerName";
-        std::ofstream temp("connect.txt", std::ofstream::out);
-        temp << clientIp << std::endl << clientPort << std::endl << playerName;
-        temp.close();
-    }
-    connectFile.close();
+    if (Config::loaded) {
+        // Load server list
+        auto serverList = String::split(Config::get<string>("server_list"), ",");
 
-    // If failed to read server settings
-    connectFile.open("server.txt", std::ifstream::in);
-    if (!connectFile.is_open() || !(connectFile >> serverPort)) {
-        connectFile.close();
-        // Create file and write default settings
-        serverPort = 54000;
-        std::ofstream temp("server.txt", std::ofstream::out);
-        temp << serverPort;
-        temp.close();
+        auto firstServer = String::split( serverList[0], ":");
+
+        clientIp = firstServer[0];
+        clientPort = std::stoi(firstServer[1]);
+        
+        std::cout << clientIp << ":" << clientPort << std::endl;
+
+        playerName = Config::get<string>("nick");
     }
-    connectFile.close();
+
 
     if (clientIp == sf::IpAddress::LocalHost) {
         server->start(serverPort);

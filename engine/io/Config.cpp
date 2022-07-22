@@ -31,7 +31,7 @@ bool Config::open(std::string filename) {
 		}
 
 		file.close();
-
+		Config::loaded = true;
 		return true;
 	}
 	catch (int) {

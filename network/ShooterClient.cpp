@@ -42,7 +42,7 @@ void ShooterClient::processUpdate(sf::Packet &packet) {
     std::string playerName;
     int ping;
 
-    while (packet >> targetId >> x >> y >> z >> health >> bodyAngle >> headAngle >> playerName >> ping) {
+    while (packet >> targetId >> x >> y >> z >> health >> bodyAngle >> headAngle >> playerName ) {
         if (_players.count(targetId)) {
             std::string name = "Enemy_" + std::to_string(targetId);
 
@@ -51,7 +51,7 @@ void ShooterClient::processUpdate(sf::Packet &packet) {
             bool isAnimate = (_players[targetId]->position() - newPosition).sqrAbs() > 0.2;
 
             _players[targetId]->translateToPoint(newPosition);
-            _players[targetId]->ping = ping;
+            //_players[targetId]->ping = ping;
 
             _players[targetId]->setHealth(health);
             _players[targetId]->rotateToAngle(Vec3D{0, bodyAngle, 0});

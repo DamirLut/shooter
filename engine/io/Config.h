@@ -18,5 +18,5 @@ public:
 		ss >> value;
 		return value;
 	};
-
+	inline static bool loaded;
 };

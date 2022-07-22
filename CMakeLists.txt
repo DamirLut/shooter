@@ -112,7 +112,8 @@ add_executable(${CMAKE_PROJECT_NAME}
         engine/network/UDPConnection.h
         engine/network/UDPSocket.cpp
         engine/network/UDPSocket.h
-        )
+        engine/utils/String.h
+        engine/utils/String.cpp)
 
 if(APPLE OR UNIX)
     include_directories(/usr/local/include)
