@@ -1,1 +1,3 @@
-54000
+port=54000
+# Time out for disconnect player
+timeout=30

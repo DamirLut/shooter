@@ -1,0 +1,8 @@
+# client variables
+
+server_list=ip.damirlut.online:54000,localhost:54000
+nick=DamirLut
+
+# server variables
+port=54000
+timeout=30
